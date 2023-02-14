@@ -1,4 +1,5 @@
 const path = require('node:path');
+const { mergeConfig } = require('vite');
 
 module.exports = {
   framework: '@storybook/react',
@@ -13,14 +14,17 @@ module.exports = {
     storyStoreV7: true,
   },
   async viteFinal(config) {
-    // because rollup does not respect NODE_PATH
-    config.build.rollupOptions = {
-      plugins: {
-        resolveId: function (code, id) {
-          if (code === 'react') return path.resolve(require.resolve('react'));
+    return mergeConfig(config, {
+      // because rollup does not respect NODE_PATH, and we have a funky example setup that needs it
+      build: {
+        rollupOptions: {
+          plugins: {
+            resolveId(code) {
+              if (code === 'React') return path.resolve(require.resolve('react'));
+            },
+          },
         },
       },
-    };
-    return config;
+    });
   },
 };
